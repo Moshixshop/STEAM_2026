@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROWC LAWN·BOT — เช็คลิสต์อุปกรณ์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b09;
+    --panel:#0d1712;
+    --panel-border:#1c2e22;
+    --green:#3df089;
+    --green-dim:#1f6b46;
+    --copper:#e8a33d;
+    --copper-dim:#7a5a26;
+    --text-bright:#eafbf0;
+    --text-muted:#6b8577;
+    --text-dim:#3a4f44;
+    --danger:#ff6b6b;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{margin:0;padding:0;}
+
+  body{
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(rgba(61,240,137,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(61,240,137,0.035) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--text-bright);
+    font-family:'Sarabun', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:40px 20px 60px;
+  }
+
+  /* ---------- header ---------- */
+  .board-header{
+    margin-bottom:40px;
+  }
+
+  .eyebrow{
+    font-family:'Chakra Petch', sans-serif;
+    font-size:0.72rem;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--text-muted);
+    margin-bottom:10px;
+  }
+
+  h1{
+    font-family:'Chakra Petch', sans-serif;
+    font-weight:700;
+    font-size:clamp(1.8rem, 6vw, 2.6rem);
+    margin:0 0 6px;
+    color:var(--text-bright);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .leaf{font-size:0.85em;}
+
+  .version{
+    font-size:0.5em;
+    font-weight:500;
+    color:var(--green);
+    letter-spacing:0.06em;
+    border:1px solid var(--green-dim);
+    border-radius:999px;
+    padding:4px 12px;
+    white-space:nowrap;
+  }
+
+  .subtitle{
+    color:var(--text-muted);
+    font-size:0.95rem;
+    margin:0 0 28px;
+  }
+
+  .gauge-block{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    padding:20px 22px;
+  }
+
+  .gauge-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+
+  .gauge-title{
+    font-family:'Chakra Petch', sans-serif;
+    font-weight:600;
+    font-size:0.85rem;
+    letter-spacing:0.06em;
+    color:var(--text-muted);
+  }
+
+  .reset-btn{
+    font-family:'Sarabun', sans-serif;
+    font-size:0.8rem;
+    background:transparent;
+    border:1px solid var(--panel-border);
+    color:var(--text-muted);
+    border-radius:999px;
+    padding:6px 14px;
+    cursor:pointer;
+  }
+
+  .reset-btn:hover{ border-color:var(--green-dim); color:var(--text-bright); }
+  .reset-btn:focus-visible{ outline:2px solid var(--green); outline-offset:2px; }
+
+  .gauge-track{
+    position:relative;
+    height:18px;
+    border-radius:9px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--panel-border);
+    overflow:hidden;
+  }
+
+  .gauge-fill{
+    position:absolute;
+    inset:0;
+    width:0%;
+    background:linear-gradient(90deg, var(--green-dim), var(--green));
+    transition:width .35s ease;
+  }
+
+  .gauge-numbers{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:12px;
+    font-family:'Chakra Petch', sans-serif;
+    font-size:0.85rem;
+    color:var(--text-muted);
+    flex-wrap:wrap;
+  }
+
+  .gauge-numbers strong{ color:var(--text-bright); font-weight:600; }
+
+  .plan-line{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--panel-border);
+    font-size:0.82rem;
+    color:var(--text-muted);
+  }
+
+  .plan-line strong{ color:var(--text-bright); }
+  #grandStatus.ok{ color:var(--green); font-weight:600; }
+  #grandStatus.over{ color:var(--danger); font-weight:600; }
+
+  /* ---------- modules ---------- */
+  .module{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:22px;
+  }
+
+  .module::before, .module::after{
+    content:'';
+    position:absolute;
+    width:14px;
+    height:14px;
+    pointer-events:none;
+  }
+  .module::before{
+    top:-1px; left:-1px;
+    border-top:2px solid var(--copper);
+    border-left:2px solid var(--copper);
+    border-radius:6px 0 0 0;
+  }
+  .module::after{
+    bottom:-1px; right:-1px;
+    border-bottom:2px solid var(--copper);
+    border-right:2px solid var(--copper);
+    border-radius:0 0 6px 0;
+  }
+
+  .module-head{
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px 12px;
+    margin-bottom:16px;
+  }
+
+  .module-tag{
+    font-family:'Chakra Petch', sans-serif;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    color:var(--copper-dim);
+    border:1px solid var(--copper-dim);
+    border-radius:4px;
+    padding:2px 7px;
+  }
+
+  .module-head h2{
+    font-family:'Chakra Petch', sans-serif;
+    font-size:1.05rem;
+    font-weight:600;
+    margin:0;
+    color:var(--text-bright);
+    flex:1;
+  }
+
+  .module-head h2 .en{
+    font-size:0.75rem;
+    font-weight:400;
+    color:var(--text-muted);
+    margin-left:6px;
+  }
+
+  .module-sum{
+    font-family:'Chakra Petch', sans-serif;
+    font-weight:700;
+    font-size:0.9rem;
+    color:var(--copper);
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:10px;
+  }
+
+  .card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:#0a140f;
+    border:1px solid var(--panel-border);
+    border-radius:10px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+  }
+
+  .card.is-checked{
+    border-color:var(--green-dim);
+    background:rgba(61,240,137,0.06);
+  }
+
+  .check{
+    position:absolute;
+    width:1px; height:1px;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .check-box{
+    width:22px; height:22px;
+    flex-shrink:0;
+    border:2px solid var(--text-dim);
+    border-radius:6px;
+    position:relative;
+    transition:background .2s ease, border-color .2s ease;
+  }
+
+  .check-box::after{
+    content:'✓';
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    font-weight:700;
+    color:var(--bg);
+    opacity:0;
+    transition:opacity .15s ease;
+  }
+
+  .card.is-checked .check-box{
+    background:var(--green);
+    border-color:var(--green);
+  }
+  .card.is-checked .check-box::after{ opacity:1; }
+
+  .check:focus-visible ~ .check-box{
+    outline:2px solid var(--green);
+    outline-offset:2px;
+  }
+
+  .card-body{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width:0;
+  }
+
+  .card-name{
+    font-family:'Chakra Petch', sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    color:var(--text-bright);
+  }
+
+  .card-desc{
+    font-size:0.8rem;
+    color:var(--text-muted);
+  }
+
+  .card-price{
+    font-family:'Chakra Petch', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    color:var(--copper);
+    white-space:nowrap;
+  }
+
+  .card-price.free{ color:var(--green); }
+
+  .card.is-checked .card-name{ color:var(--text-muted); }
+  .card.is-checked .card-price{
+    color:var(--text-dim);
+    text-decoration:line-through;
+  }
+  .card.is-checked .card-price.free{ color:var(--green-dim); }
+
+  footer{
+    text-align:center;
+    color:var(--text-dim);
+    font-family:'Chakra Petch', sans-serif;
+    font-size:0.78rem;
+    letter-spacing:0.04em;
+    margin-top:30px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="board-header">
+    <div class="eyebrow">Project Schematic · STEAM 2026</div>
+    <h1><span class="leaf" aria-hidden="true">🌿</span>ROWC <span class="version">LAWN·BOT</span></h1>
+    <p class="subtitle">รถตัดหญ้าบังคับวิทยุ ควบคุม + ดูกล้องผ่านเว็บ</p>
+
+    <div class="gauge-block">
+      <div class="gauge-row">
+        <span class="gauge-title">⚡ POWER BUDGET</span>
+        <button id="resetBtn" class="reset-btn" type="button">↺ เคลียร์ทั้งหมด</button>
+      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="gaugeFill"></div></div>
+      <div class="gauge-numbers">
+        <span>จัดมาแล้ว <strong id="acquired">฿0</strong></span>
+        <span>เหลือ <strong id="remaining">฿1,500</strong></span>
+        <span><strong id="countDone">0</strong>/<span id="countTotal">14</span> ชิ้น</span>
+      </div>
+      <div class="plan-line">
+        แผนทั้งหมดในลิสต์รวม <strong id="grandTotal">฿0</strong> ·
+        <span id="grandStatus"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="module">
+      <div class="module-head">
+        <span class="module-tag">MODULE 01</span>
+        <h2>สมองกล <span class="en">Control &amp; Brain</span></h2>
+        <span class="module-sum">…</span>
+      </div>
+      <div class="card-grid">
+        <label class="card">
+          <input type="checkbox" class="check" data-price="150">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">ESP32</span>
+            <span class="card-desc">ไมโครคอนโทรลเลอร์หลัก</span>
+          </span>
+          <span class="card-price">฿150</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="180">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">ESP32-CAM</span>
+            <span class="card-desc">โมดูลกล้อง WiFi</span>
+          </span>
+          <span class="card-price">฿180</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="module">
+      <div class="module-head">
+        <span class="module-tag">MODULE 02</span>
+        <h2>ระบบขับเคลื่อน <span class="en">Drive</span></h2>
+        <span class="module-sum">…</span>
+      </div>
+      <div class="card-grid">
+        <label class="card">
+          <input type="checkbox" class="check" data-price="60">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">L298N Motor Driver</span>
+            <span class="card-desc">ตัวขับมอเตอร์</span>
+          </span>
+          <span class="card-price">฿60</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="200">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">DC Motor 12V × 2</span>
+            <span class="card-desc">มอเตอร์ขับเคลื่อน</span>
+          </span>
+          <span class="card-price">฿200</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="180">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">ล้อยาง 4 นิ้ว × 4</span>
+            <span class="card-desc">ล้อสำหรับพื้นดิน</span>
+          </span>
+          <span class="card-price">฿180</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="module">
+      <div class="module-head">
+        <span class="module-tag">MODULE 03</span>
+        <h2>ตัด &amp; เก็บหญ้า <span class="en">Cut &amp; Collect</span></h2>
+        <span class="module-sum">…</span>
+      </div>
+      <div class="card-grid">
+        <label class="card">
+          <input type="checkbox" class="check" data-price="150">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">มอเตอร์ใบมีด DC 775 + ใบพัดกวาดเศษ</span>
+            <span class="card-desc">แกนเดียวกัน ตัดและเหวี่ยงหญ้าเข้ากล่อง</span>
+          </span>
+          <span class="card-price">฿150</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="100">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">ใบมีดสแตนเลส</span>
+            <span class="card-desc">ใบตัดวัชพืช</span>
+          </span>
+          <span class="card-price">฿100</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="0">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">กล่องเก็บหญ้า DIY</span>
+            <span class="card-desc">ขวด/กล่องรีไซเคิล</span>
+          </span>
+          <span class="card-price free">ฟรี</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="module">
+      <div class="module-head">
+        <span class="module-tag">MODULE 04</span>
+        <h2>ระบบพลังงาน <span class="en">Power</span></h2>
+        <span class="module-sum">…</span>
+      </div>
+      <div class="card-grid">
+        <label class="card">
+          <input type="checkbox" class="check" data-price="220">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">แบตเตอรี่ 18650 × 4</span>
+            <span class="card-desc">เกรดประหยัด</span>
+          </span>
+          <span class="card-price">฿220</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="30">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">Buck Converter 5V</span>
+            <span class="card-desc">ลดไฟให้ ESP32 ปลอดภัย</span>
+          </span>
+          <span class="card-price">฿30</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="module">
+      <div class="module-head">
+        <span class="module-tag">MODULE 05</span>
+        <h2>โครงสร้าง &amp; เบ็ดเตล็ด <span class="en">Body &amp; Misc</span></h2>
+        <span class="module-sum">…</span>
+      </div>
+      <div class="card-grid">
+        <label class="card">
+          <input type="checkbox" class="check" data-price="80">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">โครงรถ DIY</span>
+            <span class="card-desc">ไม้อัด/อะคริลิกเหลือใช้</span>
+          </span>
+          <span class="card-price">฿80</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="30">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">Relay / MOSFET</span>
+            <span class="card-desc">สวิตช์ควบคุมใบมีด</span>
+          </span>
+          <span class="card-price">฿30</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="50">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">กล่องกันน้ำ DIY</span>
+            <span class="card-desc">ครอบวงจรกันฝน</span>
+          </span>
+          <span class="card-price">฿50</span>
+        </label>
+        <label class="card">
+          <input type="checkbox" class="check" data-price="70">
+          <span class="check-box" aria-hidden="true"></span>
+          <span class="card-body">
+            <span class="card-name">สาย + เบ็ดเตล็ด</span>
+            <span class="card-desc">สายไฟ, หัวต่อ ฯลฯ</span>
+          </span>
+          <span class="card-price">฿70</span>
+        </label>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>ROWC LAWN·BOT — ทีม 14 คน · งบเป้าหมาย ฿1,500</footer>
+
+</div>
+
+<script>
+  const TOTAL_BUDGET = 1500;
+  const checks = Array.from(document.querySelectorAll('.check'));
+  const elAcquired = document.getElementById('acquired');
+  const elRemaining = document.getElementById('remaining');
+  const elCount = document.getElementById('countDone');
+  const elCountTotal = document.getElementById('countTotal');
+  const gaugeFill = document.getElementById('gaugeFill');
+  const elGrandTotal = document.getElementById('grandTotal');
+  const elGrandStatus = document.getElementById('grandStatus');
+
+  function formatBaht(n){
+    return '฿' + Number(n).toLocaleString('th-TH');
+  }
+
+  function recalc(){
+    let sum = 0, count = 0;
+    checks.forEach(c => {
+      const card = c.closest('.card');
+      if(c.checked){
+        sum += Number(c.dataset.price || 0);
+        count++;
+        card.classList.add('is-checked');
+      } else {
+        card.classList.remove('is-checked');
+      }
+    });
+    elAcquired.textContent = formatBaht(sum);
+    elRemaining.textContent = formatBaht(Math.max(TOTAL_BUDGET - sum, 0));
+    elCount.textContent = count;
+    const pct = Math.min(100, Math.round((sum / TOTAL_BUDGET) * 100));
+    gaugeFill.style.width = pct + '%';
+  }
+
+  function initModuleSums(){
+    document.querySelectorAll('.module').forEach(mod => {
+      const sum = Array.from(mod.querySelectorAll('.check'))
+        .reduce((a, c) => a + Number(c.dataset.price || 0), 0);
+      const tag = mod.querySelector('.module-sum');
+      if(tag) tag.textContent = formatBaht(sum);
+    });
+  }
+
+  function initGrandTotal(){
+    const grand = checks.reduce((a, c) => a + Number(c.dataset.price || 0), 0);
+    elGrandTotal.textContent = formatBaht(grand);
+    if(grand > TOTAL_BUDGET){
+      elGrandStatus.textContent = 'เกินงบ ' + formatBaht(grand - TOTAL_BUDGET);
+      elGrandStatus.classList.add('over');
+    } else {
+      elGrandStatus.textContent = 'อยู่ในงบ เหลือ ' + formatBaht(TOTAL_BUDGET - grand);
+      elGrandStatus.classList.add('ok');
+    }
+  }
+
+  elCountTotal.textContent = checks.length;
+  checks.forEach(c => c.addEventListener('change', recalc));
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    checks.forEach(c => c.checked = false);
+    recalc();
+  });
+
+  initModuleSums();
+  initGrandTotal();
+  recalc();
+</script>
+
+</body>
+</html>
